@@ -1,8 +1,7 @@
-FROM node:20-bookworm-slim
+FROM node:22-alpine3.24
 
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends openssl \
-  && rm -rf /var/lib/apt/lists/*
+# openssl + musl compat: Prisma migrate still needs native engines
+RUN apk add --no-cache openssl libc6-compat
 
 WORKDIR /app
 
@@ -10,6 +9,9 @@ COPY package.json package-lock.json* ./
 RUN npm install
 
 COPY prisma ./prisma
+COPY prisma.config.ts ./
+# prisma generate loads prisma.config.ts, which requires DATABASE_URL via env()
+ENV DATABASE_URL=postgresql://postgres:postgres@localhost:5432/qiita_app
 RUN npx prisma generate
 
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
