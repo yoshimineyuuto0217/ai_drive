@@ -6,5 +6,5 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["prisma/seed.ts"]
+  "include": ["prisma/seed.ts", "src/generated/**/*.ts"]
 }
