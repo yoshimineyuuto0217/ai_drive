@@ -20,6 +20,9 @@ export default function HomePage() {
           <Link href="/articles/new">
             <a className="button-secondary">記事を投稿する</a>
           </Link>
+          <Link href="/learn/ssg">
+            <a className="button-secondary">SSG / ISR を学ぶ</a>
+          </Link>
         </div>
       </section>
     </>

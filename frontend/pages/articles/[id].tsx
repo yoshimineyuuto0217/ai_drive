@@ -1,59 +1,56 @@
+import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { ErrorBanner } from '../../components/ErrorBanner';
-import { Loading } from '../../components/Loading';
 import { TagList } from '../../components/TagList';
 import { articleApi } from '../../lib/api';
-import { formatDate } from '../../lib/format';
+import { formatDate, parsePositiveInt } from '../../lib/format';
 import { Article } from '../../lib/types';
 
-export default function ArticleDetailPage() {
+type ArticleDetailPageProps = {
+  article: Article | null;
+  error: string;
+};
+
+export const getServerSideProps: GetServerSideProps<ArticleDetailPageProps> = async (context) => {
+  const id = parsePositiveInt(context.params?.id);
+  if (id === null) {
+    return {
+      props: {
+        article: null,
+        error: '記事IDが不正です',
+      },
+    };
+  }
+
+  try {
+    const article = await articleApi.getById(id);
+    return {
+      props: {
+        article,
+        error: '',
+      },
+    };
+  } catch (err) {
+    return {
+      props: {
+        article: null,
+        error: err instanceof Error ? err.message : '記事の取得に失敗しました',
+      },
+    };
+  }
+};
+
+export default function ArticleDetailPage({ article, error: initialError }: ArticleDetailPageProps) {
   const router = useRouter();
-  const id = Number(router.query.id);
-  const [article, setArticle] = useState<Article | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(initialError);
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    if (!router.isReady) {
-      return;
-    }
-
-    if (!Number.isInteger(id) || id <= 0) {
-      setError('記事IDが不正です');
-      setLoading(false);
-      return;
-    }
-
-    let mounted = true;
-    setLoading(true);
-
-    articleApi
-      .getById(id)
-      .then((data) => {
-        if (mounted) {
-          setArticle(data);
-          setError('');
-        }
-      })
-      .catch((err: Error) => {
-        if (mounted) {
-          setError(err.message);
-        }
-      })
-      .finally(() => {
-        if (mounted) {
-          setLoading(false);
-        }
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, [router.isReady, id]);
+    setError(initialError);
+  }, [initialError, article?.id]);
 
   const handleDelete = async () => {
     if (!article) {
@@ -82,7 +79,6 @@ export default function ArticleDetailPage() {
         <title>{article ? `${article.title} | Qiita Clone` : '記事詳細 | Qiita Clone'}</title>
       </Head>
       {error && <ErrorBanner message={error} />}
-      {loading && <Loading />}
       {article && (
         <article className="card article-detail">
           <TagList tags={article.tags} />
