@@ -10,18 +10,14 @@ export const Layout = ({ children }: LayoutProps) => {
     <div className="page">
       <header className="site-header">
         <div className="container header-inner">
-          <Link href="/">
-            <a className="logo">Qiita Clone</a>
+          <Link href="/" className="logo">
+            Qiita Clone
           </Link>
           <nav className="nav">
-            <Link href="/articles">
-              <a>記事一覧</a>
-            </Link>
-            <Link href="/learn/ssg">
-              <a>学習</a>
-            </Link>
-            <Link href="/articles/new">
-              <a className="button-primary header-cta">投稿する</a>
+            <Link href="/articles">記事一覧</Link>
+            <Link href="/learn/ssg">学習</Link>
+            <Link href="/articles/new" className="button-primary header-cta">
+              投稿する
             </Link>
           </nav>
         </div>

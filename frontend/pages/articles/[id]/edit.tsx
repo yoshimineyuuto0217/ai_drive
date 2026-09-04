@@ -1,54 +1,54 @@
+import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { ArticleForm, ArticleFormValues, parseTagInput } from '../../../components/ArticleForm';
 import { ErrorBanner } from '../../../components/ErrorBanner';
-import { Loading } from '../../../components/Loading';
 import { articleApi } from '../../../lib/api';
+import { parsePositiveInt } from '../../../lib/format';
 import { Article } from '../../../lib/types';
 
-export default function EditArticlePage() {
+type EditArticlePageProps = {
+  article: Article | null;
+  error: string;
+};
+
+export const getServerSideProps: GetServerSideProps<EditArticlePageProps> = async (context) => {
+  const id = parsePositiveInt(context.params?.id);
+  if (id === null) {
+    return {
+      props: {
+        article: null,
+        error: '記事IDが不正です',
+      },
+    };
+  }
+
+  try {
+    const article = await articleApi.getById(id);
+    return {
+      props: {
+        article,
+        error: '',
+      },
+    };
+  } catch (err) {
+    return {
+      props: {
+        article: null,
+        error: err instanceof Error ? err.message : '記事の取得に失敗しました',
+      },
+    };
+  }
+};
+
+export default function EditArticlePage({ article, error: initialError }: EditArticlePageProps) {
   const router = useRouter();
-  const id = Number(router.query.id);
-  const [article, setArticle] = useState<Article | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(initialError);
 
   useEffect(() => {
-    if (!router.isReady) {
-      return;
-    }
-
-    if (!Number.isInteger(id) || id <= 0) {
-      setError('記事IDが不正です');
-      setLoading(false);
-      return;
-    }
-
-    let mounted = true;
-
-    articleApi
-      .getById(id)
-      .then((data) => {
-        if (mounted) {
-          setArticle(data);
-        }
-      })
-      .catch((err: Error) => {
-        if (mounted) {
-          setError(err.message);
-        }
-      })
-      .finally(() => {
-        if (mounted) {
-          setLoading(false);
-        }
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, [router.isReady, id]);
+    setError(initialError);
+  }, [initialError, article?.id]);
 
   const handleSubmit = async (values: ArticleFormValues) => {
     if (!article) {
@@ -78,7 +78,6 @@ export default function EditArticlePage() {
         <p className="muted">内容を修正して更新できます。</p>
       </div>
       {error && <ErrorBanner message={error} />}
-      {loading && <Loading />}
       {article && (
         <div className="card">
           <ArticleForm

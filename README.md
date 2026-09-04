@@ -1,6 +1,11 @@
 # ai_drive
 
-AI駆動開発の練習用プロジェクトです。Next.js 12（Page Router）と Express / Prisma / PostgreSQL を使い、Qiita 風の記事投稿アプリをフロントエンド・バックエンド・DBまで一通り実装しています。
+AI駆動開発の練習用プロジェクトです。Qiita 風の記事投稿アプリを、Pages Router 版と App Router 版の 2 つ用意しています。
+
+- リポジトリ直下（`frontend/` / `backend/`）が Next.js 12（Pages Router）版です
+- App Router 版は `ai_drive_app_router/` にあり、起動方法はそちらの README を参照してください
+
+以下はこのディレクトリ直下の Pages Router 版の説明です。
 
 ## プロジェクト概要
 
@@ -9,7 +14,7 @@ AI駆動開発の練習用プロジェクトです。Next.js 12（Page Router）
 - フロントエンドはローカルの Next.js 12 から Backend API へ HTTP 通信します
 - バックエンドは Docker 上の Node.js + TypeScript + Express で動作します
 - データベースは Docker 上の PostgreSQL を使用します
-- Next.js の API Routes や App Router（`app/`）は使用しません
+- Pages Router 版では Next.js の API Routes や `app/` は使用しません（App Router 版は `ai_drive_app_router/`）
 
 通信の流れ:
 
